@@ -1,0 +1,7 @@
+build/
+.coveralls.yml
+coverage/
+.nyc_output/
+test/
+.DS_Store
+bench/.DS_Store

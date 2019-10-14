@@ -1,0 +1,11 @@
+version: "3"
+services:
+  web:
+    build: .
+    ports:
+      - "4000:4000"
+  db:
+    image: chasesmith95/proxima-db-server:latest
+    container_name: proxima-db
+    ports:
+      - "50051:50051"

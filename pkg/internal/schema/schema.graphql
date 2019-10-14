@@ -1,0 +1,317 @@
+scalar Long
+scalar Number
+scalar DateTime
+scalar Time
+
+
+type Query {
+  blockStats(prove: Boolean): ProximaBlockStats
+  fees(prove: Boolean): ProximaFees
+  tokens(limit: Int, offset: Int, prove: Boolean): ProximaTokens
+  account(address: String, prove: Boolean): ProximaAccount
+  orders(address: String, symbol: String, start: String, end: String, orderSide: Int, open: Boolean, status: String, total: Int, limit: Int, offset: Int, prove: Boolean): [ProximaOrder]
+  order(orderId: String, prove: Boolean): ProximaOrder
+  transactions(address: String, txType: String, txAsset: String, txSide: Int, blockHeight: String, startTime: String, endTime: String, limit: Int, offset: Int, prove: Boolean): [ProximaTransaction]
+  transaction(txHash: String, prove: Boolean): ProximaTransaction
+  markets(limit: Int, offset: Int, prove: Boolean): ProximaMarkets
+  marketTicker(symbol: String, prove: Boolean): ProximaMarketTicker
+  marketTickers(limit: Int, offset: Int, prove: Boolean): ProximaMarketTickers
+  marketDepth(symbol_pair: String, limit: Int, prove: Boolean): ProximaMarketDepth
+  marketCandleSticks(symbol: String, startTime: String, endTime: String, interval: String, limit: Int, prove: Boolean): ProximaMarketCandleSticks
+  trades(address: String, symbol: String, quoteAssetSymbol: String, blockHeight: String, startTime: String, endTime: String, buyerOrderId: String, sellerOrderId: String, orderSide: Int, limit: Int, offset: Int, prove: Boolean): [ProximaTrade]
+  trade(tradeId: String, prove: Boolean): ProximaTrade
+  atomicSwaps(fromAddress: String, toAddress: String, startTime: String, endTime: String, limit: Int, offset: Int, prove: Boolean): [ProximaAtomicSwap]
+  atomicSwap(id: String, prove: Boolean): ProximaAtomicSwap
+  validators(prove: Boolean): ProximaValidators
+  timelocks(address: String, id: Int, prove: Boolean): ProximaTimelocks
+}
+
+
+interface ProximaModel {
+  proof: Proof
+}
+
+type Proof {
+  root: String
+  proof: String
+}
+
+type ProximaBlockStats implements ProximaModel {
+  block_stats: BlockStats
+  proof: Proof
+}
+
+type BlockStats {
+  latest_block_hash: String
+  latest_app_hash: String
+  latest_block_height:	String
+  latest_block_time:	String
+  catching_up:	Boolean
+}
+
+type ProximaFees implements ProximaModel {
+  fees: [Fee]
+  proof: Proof
+
+}
+
+type Fee {
+  msg_type: String
+  fee: Int
+  fee_for: Int
+  multi_transfer_fee: String
+  lower_limit_as_multi: String
+}
+
+type ProximaTokens implements ProximaModel {
+  tokens: [Token]
+  proof: Proof
+
+}
+
+type Token {
+  name: String
+  symbol: String
+  original_symbol: String
+  total_supply: String
+  owner: String
+}
+
+type ProximaAccount implements ProximaModel {
+  account: Account
+  proof: Proof
+
+}
+
+type Account  {
+  account_number: Int
+  address: String
+  public_key: [Int]
+  sequence: Int
+  balances: [Balance]
+}
+
+type Balances {
+ address: String
+ balances: [Balance]
+}
+
+type Balance {
+  symbol: String
+  free: String
+  locked: String
+  frozen: String
+}
+
+type ProximaOrder implements ProximaModel {
+  order: Order
+  proof: Proof
+}
+
+type OrderList {
+  orders: [Order]
+  total: Int
+}
+
+type Order {
+  cumulateQuantity: String
+  fee: String
+  lastExecutedPrice: String
+  lastExecutedQuantity: String
+  orderCreateTime: String
+  orderId: String
+  owner: String
+  price: String
+  quantity: String
+  side: Int
+  status: String
+  symbol: String
+  timeInForce: Int
+  tradeId: String
+  transactionHash: String
+  transactionTime: String
+  type: Int
+}
+
+type ProximaTransaction implements ProximaModel {
+  transaction: Transaction
+  proof: Proof
+
+}
+
+type Transaction {
+  blockHeight: String
+  code: Int
+  data: String
+  fromAddr: String
+  memo: String
+  orderId: String
+  proposalId: String
+  sequence: String
+  source: String
+  swapId: String
+  timeStamp:	String
+  toAddr:	String
+  txAsset:	String
+  txFee:	String
+  txHash:	String
+  txType:	String
+  value:	String
+}
+
+type ProximaMarketCandleSticks implements ProximaModel {
+  symbol: String
+  interval: String
+  market_candlesticks: [CandleStick]
+  proof: Proof
+}
+
+type CandleStick {
+  close: Float
+  closingTime: String
+  high: Float
+  low: Float
+  numberOfTrades: Int
+  open: Float
+  openTime: String
+  quoteAssetVolume: Float
+  volume: Float
+}
+
+type ProximaTrade {
+  trade: Trade
+  proof: Proof
+}
+
+type Trade {
+  baseAsset: String
+  blockHeight: String
+  buyFee: String
+  buyerId: String
+  buyerOrderId: String
+  buySingleFee: String
+  price: String
+  quantity: String
+  quoteAsset: String
+  sellFee: String
+  sellerId: String
+  sellerOrderId: String
+  sellSingleFee: String
+  symbol: String
+  tickType: String
+  time: String
+  tradeId: String
+}
+
+type ProximaMarkets implements ProximaModel {
+  markets: [Market]
+  proof: Proof
+}
+
+type Market {
+  base_asset_symbol: String
+  quote_asset_symbol: String
+  list_price: String
+  tick_size: String
+  lot_size: String
+}
+
+type ProximaMarketTickers implements ProximaModel {
+  market_tickers: [MarketTicker]
+  proof: Proof
+}
+
+type ProximaMarketTicker implements ProximaModel {
+  market_ticker: MarketTicker
+  proof: Proof
+}
+
+type MarketTicker {
+  askPrice: String
+  askQuantity: String
+  bidPrice: String
+  closeTime: String
+  count: String
+  firstId: String
+  highPrice: String
+  lastId: String
+  lastPrice: String
+  lastQuantity: String
+  lowPrice: String
+  openTime: String
+  prevClosePrice: String
+  priceChange: String
+  priceChangePercent: String
+  quoteVolume: String
+  symbol: String
+  volume: String
+  weightedAvgPrice: String
+}
+
+type ProximaMarketDepth implements ProximaModel {
+  market_depth: MarketDepth
+  proof: Proof
+}
+
+type MarketDepth {
+  symbol_pair: String
+  bids: [String]
+  asks: [String]
+}
+
+type ProximaAtomicSwap {
+  atomic_swap: AtomicSwap
+  proof: Proof
+}
+
+type AtomicSwap {
+  closedTime: String
+  createdTime: String
+  crossChain: Int
+  expectedIncome:	String
+  expireHeight:	String
+  fromAddr:	String
+  inAmount:	String
+  outAmount:	String
+  randomString:	String
+  randomStringHash: String
+  recipientOtherChain: String
+  status:	Int
+  swapId:	String
+  timestamp: String
+  toAddr: String
+  updateTime: String
+}
+
+type ProximaValidators implements ProximaModel {
+  validators: [Validator]
+  proof: Proof
+}
+
+type Validator {
+  address: String
+  pub_key: String
+  voting_power: Int
+  accum: Int
+}
+
+type ProximaTimelocks implements ProximaModel {
+  timelocks: TimelockList
+  proof: Proof
+}
+
+type TimelockList {
+  timelocks: [Timelock]
+}
+
+type Timelock {
+  ID: Int
+  description: String
+  amount: Coin
+  locktime: String
+}
+
+type Coin {
+  denom: String
+  amount: Int
+}
