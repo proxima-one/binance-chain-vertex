@@ -3,6 +3,7 @@ package datasources
 import (
   "encoding/json"
   "strconv"
+  _ "fmt"
 )
 
 func binance_translate(requestType string, res []byte) (interface{}) {
@@ -24,7 +25,7 @@ var TRANSLATE_RES = map[string]func([]byte) (interface{}) {
   "trade": tradeTranslate,
   "atomicSwap": atomicSwapTranslate,
 }
-
+//todo
 func feesTranslate(res []byte) (interface{}) {
   fees:= make([]map[string]interface{}, 0)
   json.Unmarshal(res, &fees)
@@ -46,12 +47,14 @@ func blockStatsTranslate(res []byte) (interface{}) {
   sync_val := val["sync_info"]
   if sync_val == nil {
       sync_val = make(map[string]interface{})
+      return sync_val
+  } else {
+    v := sync_val.(map[string]interface{})
+    temp:= int64(v["latest_block_height"].(float64))
+    v["latest_block_height"] = strconv.FormatInt(temp, 10)
+    return v
   }
 
-  v := sync_val.(map[string]interface{})
-  temp:= int64(v["latest_block_height"].(float64))
-  v["latest_block_height"] = strconv.FormatInt(temp, 10)
-  return v
 }
 
 func validatorsTranslate(res []byte) (interface{}) {

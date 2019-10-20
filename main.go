@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	_ "context"
+	_ "github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/handler"
 	proxima "github.com/proxima-one/proxima-db-client-go"
 	binance_chain_resolvers "github.com/proxima-one/binance-chain-subgraph/pkg/resolvers"
@@ -47,6 +49,16 @@ func main() {
 
 	http.Handle("/", handler.Playground("GraphQL playground", "/query"))
 	http.Handle("/query", handler.GraphQL(gql.NewExecutableSchema(binance_chain_resolvers.NewResolver(proximaDB))))
+
+
+
+	// handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+	// 			rc := graphql.GetResolverContext(ctx)
+	// 			fmt.Println("Entered", rc.Object, rc.Field.Name)
+	// 			res, err = next(ctx)
+	// 			fmt.Println("Left", rc.Object, rc.Field.Name, "=>", res, err)
+	// 			return res, err
+	// 		})
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))

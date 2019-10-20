@@ -4,7 +4,10 @@ import (
   url "net/url"
   time "time"
   "encoding/json"
+  "net/http"
+  "io/ioutil"
   proxima "github.com/proxima-one/proxima-db-client-go"
+  _ "fmt"
 )
 
 type Datasource struct{
@@ -14,7 +17,7 @@ type Datasource struct{
 }
 
 func (ds *Datasource) Start() {
-  static_interval := 10000
+  static_interval := 1000000
   dynamic_interval := 5000
   go ds.staticUpdates(static_interval)
   go ds.dynamicUpdates(dynamic_interval)
@@ -32,7 +35,7 @@ func (ds *Datasource) staticUpdates(interval int) {
 
 func (ds *Datasource) dynamicUpdates(interval int) {
   for {
-    blockStats := ds.updateBlockStats()
+    blockStats := ds.updateBlockStats() //err
     blockHeight := blockStats["latest_block_height"].(string)
     go ds.marketUpdates()
     go ds.transactionUpdates(blockHeight)
@@ -51,25 +54,31 @@ func NewDatasource(db *proxima.ProximaDB, rawURI string) (*Datasource, error) {
 
 func (ds *Datasource) updateFees() {
   args := make(map[string]interface{});
-  fees := ds.dataRequest("fees", args);
+  fees := ds.dataRequest("fees", args); //errs
   ds.proximaDB.Set(Primary, "Fees", fees, args)
 }
 
 func (ds *Datasource) updateValidators() {
   args := make(map[string]interface{});
-  validators := ds.dataRequest("validators", args)
+  validators := ds.dataRequest("validators", args) //errs
   ds.proximaDB.Set(Primary, "Validators", validators, args)
 }
 
+func (ds *Datasource) updateTimelocks(validators []string) {
+  panic("Not implemented")
+}
+
+
+
 func (ds *Datasource) updateTokens() {
   args := make(map[string]interface{});
-  tokens := ds.dataRequest("tokens", args)
+  tokens := ds.dataRequest("tokens", args) //errs
   ds.proximaDB.Set(Primary, "Tokens", tokens, args)
 }
 
 func (ds *Datasource) updateMarkets() {
   args := make(map[string]interface{});
-  markets := ds.dataRequest("markets", args)
+  markets := ds.dataRequest("markets", args) //errs
   ds.proximaDB.Set(Primary, "Markets", markets, args)
 }
 
@@ -167,12 +176,15 @@ func (ds *Datasource) updateOrdersByOrderId(orderIds map[string]bool) {
   dbArgs := make(map[string]interface{});
   order:= make(map[string]interface{});
   orderKey := "orderId"
+  //var err error;
   for orderId, _ := range orderIds {
     requestArgs := map[string]interface{}{
       orderKey : orderId,
     }
     order = ds.dataRequest("order", requestArgs).(map[string]interface{})
-    ds.proximaDB.Set(OrdersByOrderId, orderId, order, dbArgs)
+
+     ds.proximaDB.Set(OrdersByOrderId, orderId, order, dbArgs)
+
   }
 }
 
@@ -199,7 +211,28 @@ func (ds *Datasource) batchUpdate(table_name, dataMap map[string]interface{}) (b
 }
 
 func (ds *Datasource) dataRequest(requestType string, args map[string]interface{}) (interface{}) {
-  resp := binance_request(requestType, ds.baseUri, args)
+  resp, _ := binance_request(requestType, ds.baseUri, args)
   val := binance_translate(requestType, resp)
   return val
 }
+
+func binance_request(requestType string, baseUri string, args map[string]interface{}) ([]byte, error) {
+  uri := binance_datasource_uri[requestType](baseUri, args)
+  resp, err := http.Get(uri)
+  if err!=nil {
+    return nil, err
+  }
+  body, e := ioutil.ReadAll(resp.Body)
+  if e != nil {
+    return nil, e
+  }
+  return body, nil
+}
+
+//func (ds *Datasource)
+// order, err = ds.dataRequest("order", requestArgs).(map[string]interface{})
+// if (err != nil) {
+//   fmt.Printf(err)
+// } else {
+//  ds.proximaDB.Set(OrdersByOrderId, orderId, order, dbArgs)
+// }

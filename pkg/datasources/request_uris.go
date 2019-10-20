@@ -1,11 +1,6 @@
 
 package datasources
 
-import (
-    "io/ioutil"
-    "net/http"
-  )
-
 var binance_datasource_uri = map[string]func(string, map[string]interface{}) (string) {
   "fees" : fees_request_uri,
   "blockStats" : blockStats_request_uri,
@@ -20,13 +15,6 @@ var binance_datasource_uri = map[string]func(string, map[string]interface{}) (st
   "order": order_request_uri,
   "account" : account_request_uri,
   "atomicSwap" : atomicSwap_request_uri,
-}
-
-func binance_request(requestType string, baseUri string, args map[string]interface{}) ([]byte) {
-  uri := binance_datasource_uri[requestType](baseUri, args)
-  resp, _ := http.Get(uri)
-  body, _ := ioutil.ReadAll(resp.Body)
-  return body
 }
 
 func fees_request_uri(baseUri string, args map[string]interface{}) (string) {
