@@ -1,16 +1,20 @@
 package main
 
 import (
-	"log"
-	"net/http"
+	//"log"
+	//"net/http"
+	"github.com/gin-gonic/gin"
 	"os"
 	_ "context"
 	_ "github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/handler"
 	proxima "github.com/proxima-one/proxima-db-client-go"
-	binance_chain_resolvers "github.com/proxima-one/binance-chain-subgraph/pkg/resolvers"
+	resolver "github.com/proxima-one/binance-chain-subgraph/pkg/resolvers"
 	datasource "github.com/proxima-one/binance-chain-subgraph/pkg/datasources"
+	dataloader "github.com/proxima-one/binance-chain-subgraph/pkg/dataloader"
   gql "github.com/proxima-one/binance-chain-subgraph/pkg/gql"
+	cache "github.com/patrickmn/go-cache"
+	"time"
 )
 
 const defaultPort = "4000"
@@ -32,7 +36,15 @@ func SetupDatasource(db *proxima.ProximaDB, config map[string]string) (*datasour
 	return ds, nil
 }
 
-func main() {
+func SetDataloader(c *cache.Cache, db *proxima.ProximaDB, ds *datasource.Datasource, config map[string]string) (*dataloader.Dataloader, error) {
+	loader , err:= dataloader.NewDataloader(c, db, ds)
+	if err != nil {
+		return nil, err
+	}
+	return loader, nil
+}
+
+func SetupResolver() (gql.Config) {
 	dbConfig := make(map[string]string)
 	dbConfig["ip"] = "0.0.0.0"//"db"
 	dbConfig["port"] = "50051"
@@ -41,15 +53,40 @@ func main() {
 	datasourceConfig["uri"] = "https://dex.binance.org"
 	ds, _:= SetupDatasource(proximaDB, datasourceConfig)
 	go ds.Start()
+	c := cache.New(5*time.Minute, 10*time.Minute)
+	loader, _  := SetDataloader(c, proximaDB, ds, dbConfig)
+	return resolver.NewResolver(loader)
+}
+
+func graphqlHandler() gin.HandlerFunc {
+		resolver := SetupResolver()
+	h := handler.GraphQL(gql.NewExecutableSchema(resolver))
+
+	return func(c *gin.Context) {
+		h.ServeHTTP(c.Writer, c.Request)
+	}
+}
+
+func playgroundHandler() gin.HandlerFunc {
+	h := handler.Playground("GraphQL", "/query")
+
+	return func(c *gin.Context) {
+		h.ServeHTTP(c.Writer, c.Request)
+	}
+}
+
+func main() {
+
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort
 	}
-
-	http.Handle("/", handler.Playground("GraphQL playground", "/query"))
-	http.Handle("/query", handler.GraphQL(gql.NewExecutableSchema(binance_chain_resolvers.NewResolver(proximaDB))))
-
+	r := gin.Default()
+r.POST("/query", graphqlHandler())
+r.GET("/", playgroundHandler())
+	//fmt.Println("Test with Get      : curl -g 'http://localhost:4000/graphql?query={hello}'")
+	r.Run(":4000")
 
 
 	// handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
@@ -60,6 +97,6 @@ func main() {
 	// 			return res, err
 	// 		})
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+//	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+//	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

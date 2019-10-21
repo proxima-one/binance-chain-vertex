@@ -2,7 +2,10 @@ module github.com/proxima-one/binance-chain-subgraph
 
 require (
 	github.com/99designs/gqlgen v0.10.1
-	github.com/proxima-one/proxima-db-client-go v0.0.0-20191014170133-a1ff0329fa05
+	github.com/gin-gonic/gin v1.4.0
+	github.com/json-iterator/go v1.1.7
+	github.com/patrickmn/go-cache v2.1.0+incompatible
+	github.com/proxima-one/proxima-db-client-go v0.0.0-20191021075146-a0f2291f5490
 	github.com/stretchr/testify v1.4.0 // indirect
 	github.com/vektah/dataloaden v0.3.0 // indirect
 	github.com/vektah/gqlparser v1.1.2

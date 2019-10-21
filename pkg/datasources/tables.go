@@ -13,6 +13,7 @@ var TransactionsByBlockHeight string = "Binance-TransactionsByBlockHeight"
 var TransactionsByTimeStamp string = "Binance-ransactionsByTimeStamp"
 var TradesByTime string = "Binance-TradesByTime"
 var TradesByTradeId string = "Binance-TradesByTradeId"
+var MarketCandleSticks string = "Binance-MarketCandleSticks"
 var TradesByBuyerId string = "Binance-TradesByBuyerId"
 var TradesBySellerId string = "Binance-TradesBySellerId"
 var AtomicSwapsBySwapId string = "Binance-AtomicSwapsBySwapId"
@@ -31,6 +32,7 @@ var BinanceTableList []string = []string{
   TransactionsByToAddr,
   TransactionsByFromAddr,
   TransactionsByTimeStamp,
+  MarketCandleSticks,
   TradesByTradeId,
   TradesByBuyerId,
   TradesBySellerId,

@@ -201,10 +201,8 @@ type ComplexityRoot struct {
 	}
 
 	ProximaMarketCandleSticks struct {
-		Interval           func(childComplexity int) int
 		MarketCandlesticks func(childComplexity int) int
 		Proof              func(childComplexity int) int
-		Symbol             func(childComplexity int) int
 	}
 
 	ProximaMarketDepth struct {
@@ -270,9 +268,8 @@ type ComplexityRoot struct {
 		Markets            func(childComplexity int, limit *int, offset *int, prove *bool) int
 		Order              func(childComplexity int, orderID *string, prove *bool) int
 		Orders             func(childComplexity int, address *string, symbol *string, start *string, end *string, orderSide *int, open *bool, status *string, total *int, limit *int, offset *int, prove *bool) int
-		Timelocks          func(childComplexity int, address *string, id *int, prove *bool) int
+		Timelocks          func(childComplexity int, address *string, prove *bool) int
 		Tokens             func(childComplexity int, limit *int, offset *int, prove *bool) int
-		Trade              func(childComplexity int, tradeID *string, prove *bool) int
 		Trades             func(childComplexity int, address *string, symbol *string, quoteAssetSymbol *string, blockHeight *string, startTime *string, endTime *string, buyerOrderID *string, sellerOrderID *string, orderSide *int, limit *int, offset *int, prove *bool) int
 		Transaction        func(childComplexity int, txHash *string, prove *bool) int
 		Transactions       func(childComplexity int, address *string, txType *string, txAsset *string, txSide *int, blockHeight *string, startTime *string, endTime *string, limit *int, offset *int, prove *bool) int
@@ -284,10 +281,6 @@ type ComplexityRoot struct {
 		Description func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Locktime    func(childComplexity int) int
-	}
-
-	TimelockList struct {
-		Timelocks func(childComplexity int) int
 	}
 
 	Token struct {
@@ -361,11 +354,10 @@ type QueryResolver interface {
 	MarketDepth(ctx context.Context, symbolPair *string, limit *int, prove *bool) (*models.ProximaMarketDepth, error)
 	MarketCandleSticks(ctx context.Context, symbol *string, startTime *string, endTime *string, interval *string, limit *int, prove *bool) (*models.ProximaMarketCandleSticks, error)
 	Trades(ctx context.Context, address *string, symbol *string, quoteAssetSymbol *string, blockHeight *string, startTime *string, endTime *string, buyerOrderID *string, sellerOrderID *string, orderSide *int, limit *int, offset *int, prove *bool) ([]*models.ProximaTrade, error)
-	Trade(ctx context.Context, tradeID *string, prove *bool) (*models.ProximaTrade, error)
 	AtomicSwaps(ctx context.Context, fromAddress *string, toAddress *string, startTime *string, endTime *string, limit *int, offset *int, prove *bool) ([]*models.ProximaAtomicSwap, error)
 	AtomicSwap(ctx context.Context, id *string, prove *bool) (*models.ProximaAtomicSwap, error)
 	Validators(ctx context.Context, prove *bool) (*models.ProximaValidators, error)
-	Timelocks(ctx context.Context, address *string, id *int, prove *bool) (*models.ProximaTimelocks, error)
+	Timelocks(ctx context.Context, address *string, prove *bool) (*models.ProximaTimelocks, error)
 }
 
 type executableSchema struct {
@@ -1111,13 +1103,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ProximaFees.Proof(childComplexity), true
 
-	case "ProximaMarketCandleSticks.interval":
-		if e.complexity.ProximaMarketCandleSticks.Interval == nil {
-			break
-		}
-
-		return e.complexity.ProximaMarketCandleSticks.Interval(childComplexity), true
-
 	case "ProximaMarketCandleSticks.market_candlesticks":
 		if e.complexity.ProximaMarketCandleSticks.MarketCandlesticks == nil {
 			break
@@ -1131,13 +1116,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ProximaMarketCandleSticks.Proof(childComplexity), true
-
-	case "ProximaMarketCandleSticks.symbol":
-		if e.complexity.ProximaMarketCandleSticks.Symbol == nil {
-			break
-		}
-
-		return e.complexity.ProximaMarketCandleSticks.Symbol(childComplexity), true
 
 	case "ProximaMarketDepth.market_depth":
 		if e.complexity.ProximaMarketDepth.MarketDepth == nil {
@@ -1433,7 +1411,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Timelocks(childComplexity, args["address"].(*string), args["id"].(*int), args["prove"].(*bool)), true
+		return e.complexity.Query.Timelocks(childComplexity, args["address"].(*string), args["prove"].(*bool)), true
 
 	case "Query.tokens":
 		if e.complexity.Query.Tokens == nil {
@@ -1446,18 +1424,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Tokens(childComplexity, args["limit"].(*int), args["offset"].(*int), args["prove"].(*bool)), true
-
-	case "Query.trade":
-		if e.complexity.Query.Trade == nil {
-			break
-		}
-
-		args, err := ec.field_Query_trade_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Trade(childComplexity, args["tradeId"].(*string), args["prove"].(*bool)), true
 
 	case "Query.trades":
 		if e.complexity.Query.Trades == nil {
@@ -1534,13 +1500,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Timelock.Locktime(childComplexity), true
-
-	case "TimelockList.timelocks":
-		if e.complexity.TimelockList.Timelocks == nil {
-			break
-		}
-
-		return e.complexity.TimelockList.Timelocks(childComplexity), true
 
 	case "Token.name":
 		if e.complexity.Token.Name == nil {
@@ -1913,11 +1872,10 @@ type Query {
   marketDepth(symbol_pair: String, limit: Int, prove: Boolean): ProximaMarketDepth
   marketCandleSticks(symbol: String, startTime: String, endTime: String, interval: String, limit: Int, prove: Boolean): ProximaMarketCandleSticks
   trades(address: String, symbol: String, quoteAssetSymbol: String, blockHeight: String, startTime: String, endTime: String, buyerOrderId: String, sellerOrderId: String, orderSide: Int, limit: Int, offset: Int, prove: Boolean): [ProximaTrade]
-  trade(tradeId: String, prove: Boolean): ProximaTrade
   atomicSwaps(fromAddress: String, toAddress: String, startTime: String, endTime: String, limit: Int, offset: Int, prove: Boolean): [ProximaAtomicSwap]
   atomicSwap(id: String, prove: Boolean): ProximaAtomicSwap
   validators(prove: Boolean): ProximaValidators
-  timelocks(address: String, id: Int, prove: Boolean): ProximaTimelocks
+  timelocks(address: String, prove: Boolean): ProximaTimelocks
 }
 
 
@@ -2054,8 +2012,6 @@ type Transaction {
 }
 
 type ProximaMarketCandleSticks implements ProximaModel {
-  symbol: String
-  interval: String
   market_candlesticks: [CandleStick]
   proof: Proof
 }
@@ -2190,12 +2146,8 @@ type Validator {
 }
 
 type ProximaTimelocks implements ProximaModel {
-  timelocks: TimelockList
-  proof: Proof
-}
-
-type TimelockList {
   timelocks: [Timelock]
+  proof: Proof
 }
 
 type Timelock {
@@ -2657,22 +2609,14 @@ func (ec *executionContext) field_Query_timelocks_args(ctx context.Context, rawA
 		}
 	}
 	args["address"] = arg0
-	var arg1 *int
-	if tmp, ok := rawArgs["id"]; ok {
-		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg1
-	var arg2 *bool
+	var arg1 *bool
 	if tmp, ok := rawArgs["prove"]; ok {
-		arg2, err = ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
+		arg1, err = ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["prove"] = arg2
+	args["prove"] = arg1
 	return args, nil
 }
 
@@ -2703,28 +2647,6 @@ func (ec *executionContext) field_Query_tokens_args(ctx context.Context, rawArgs
 		}
 	}
 	args["prove"] = arg2
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_trade_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 *string
-	if tmp, ok := rawArgs["tradeId"]; ok {
-		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["tradeId"] = arg0
-	var arg1 *bool
-	if tmp, ok := rawArgs["prove"]; ok {
-		arg1, err = ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["prove"] = arg1
 	return args, nil
 }
 
@@ -6524,74 +6446,6 @@ func (ec *executionContext) _ProximaFees_proof(ctx context.Context, field graphq
 	return ec.marshalOProof2ᚖgithubᚗcomᚋproximaᚑoneᚋbinanceᚑchainᚑsubgraphᚋpkgᚋmodelsᚐProof(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _ProximaMarketCandleSticks_symbol(ctx context.Context, field graphql.CollectedField, obj *models.ProximaMarketCandleSticks) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "ProximaMarketCandleSticks",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Symbol, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _ProximaMarketCandleSticks_interval(ctx context.Context, field graphql.CollectedField, obj *models.ProximaMarketCandleSticks) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "ProximaMarketCandleSticks",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Interval, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _ProximaMarketCandleSticks_market_candlesticks(ctx context.Context, field graphql.CollectedField, obj *models.ProximaMarketCandleSticks) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -7028,10 +6882,10 @@ func (ec *executionContext) _ProximaTimelocks_timelocks(ctx context.Context, fie
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*models.TimelockList)
+	res := resTmp.([]*models.Timelock)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOTimelockList2ᚖgithubᚗcomᚋproximaᚑoneᚋbinanceᚑchainᚑsubgraphᚋpkgᚋmodelsᚐTimelockList(ctx, field.Selections, res)
+	return ec.marshalOTimelock2ᚕᚖgithubᚗcomᚋproximaᚑoneᚋbinanceᚑchainᚑsubgraphᚋpkgᚋmodelsᚐTimelock(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ProximaTimelocks_proof(ctx context.Context, field graphql.CollectedField, obj *models.ProximaTimelocks) (ret graphql.Marshaler) {
@@ -7914,47 +7768,6 @@ func (ec *executionContext) _Query_trades(ctx context.Context, field graphql.Col
 	return ec.marshalOProximaTrade2ᚕᚖgithubᚗcomᚋproximaᚑoneᚋbinanceᚑchainᚑsubgraphᚋpkgᚋmodelsᚐProximaTrade(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_trade(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_trade_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	rctx.Args = args
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Trade(rctx, args["tradeId"].(*string), args["prove"].(*bool))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*models.ProximaTrade)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOProximaTrade2ᚖgithubᚗcomᚋproximaᚑoneᚋbinanceᚑchainᚑsubgraphᚋpkgᚋmodelsᚐProximaTrade(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Query_atomicSwaps(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -8104,7 +7917,7 @@ func (ec *executionContext) _Query_timelocks(ctx context.Context, field graphql.
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Timelocks(rctx, args["address"].(*string), args["id"].(*int), args["prove"].(*bool))
+		return ec.resolvers.Query().Timelocks(rctx, args["address"].(*string), args["prove"].(*bool))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -8328,40 +8141,6 @@ func (ec *executionContext) _Timelock_locktime(ctx context.Context, field graphq
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _TimelockList_timelocks(ctx context.Context, field graphql.CollectedField, obj *models.TimelockList) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "TimelockList",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Timelocks, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*models.Timelock)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOTimelock2ᚕᚖgithubᚗcomᚋproximaᚑoneᚋbinanceᚑchainᚑsubgraphᚋpkgᚋmodelsᚐTimelock(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Token_name(ctx context.Context, field graphql.CollectedField, obj *models.Token) (ret graphql.Marshaler) {
@@ -11661,10 +11440,6 @@ func (ec *executionContext) _ProximaMarketCandleSticks(ctx context.Context, sel 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ProximaMarketCandleSticks")
-		case "symbol":
-			out.Values[i] = ec._ProximaMarketCandleSticks_symbol(ctx, field, obj)
-		case "interval":
-			out.Values[i] = ec._ProximaMarketCandleSticks_interval(ctx, field, obj)
 		case "market_candlesticks":
 			out.Values[i] = ec._ProximaMarketCandleSticks_market_candlesticks(ctx, field, obj)
 		case "proof":
@@ -12109,17 +11884,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_trades(ctx, field)
 				return res
 			})
-		case "trade":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_trade(ctx, field)
-				return res
-			})
 		case "atomicSwaps":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -12198,30 +11962,6 @@ func (ec *executionContext) _Timelock(ctx context.Context, sel ast.SelectionSet,
 			out.Values[i] = ec._Timelock_amount(ctx, field, obj)
 		case "locktime":
 			out.Values[i] = ec._Timelock_locktime(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var timelockListImplementors = []string{"TimelockList"}
-
-func (ec *executionContext) _TimelockList(ctx context.Context, sel ast.SelectionSet, obj *models.TimelockList) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.RequestContext, sel, timelockListImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("TimelockList")
-		case "timelocks":
-			out.Values[i] = ec._TimelockList_timelocks(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -13808,17 +13548,6 @@ func (ec *executionContext) marshalOTimelock2ᚖgithubᚗcomᚋproximaᚑoneᚋb
 		return graphql.Null
 	}
 	return ec._Timelock(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOTimelockList2githubᚗcomᚋproximaᚑoneᚋbinanceᚑchainᚑsubgraphᚋpkgᚋmodelsᚐTimelockList(ctx context.Context, sel ast.SelectionSet, v models.TimelockList) graphql.Marshaler {
-	return ec._TimelockList(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOTimelockList2ᚖgithubᚗcomᚋproximaᚑoneᚋbinanceᚑchainᚑsubgraphᚋpkgᚋmodelsᚐTimelockList(ctx context.Context, sel ast.SelectionSet, v *models.TimelockList) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._TimelockList(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOToken2githubᚗcomᚋproximaᚑoneᚋbinanceᚑchainᚑsubgraphᚋpkgᚋmodelsᚐToken(ctx context.Context, sel ast.SelectionSet, v models.Token) graphql.Marshaler {

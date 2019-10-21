@@ -171,8 +171,6 @@ type ProximaFees struct {
 func (ProximaFees) IsProximaModel() {}
 
 type ProximaMarketCandleSticks struct {
-	Symbol             *string        `json:"symbol"`
-	Interval           *string        `json:"interval"`
 	MarketCandlesticks []*CandleStick `json:"market_candlesticks"`
 	Proof              *Proof         `json:"proof"`
 }
@@ -215,8 +213,8 @@ type ProximaOrder struct {
 func (ProximaOrder) IsProximaModel() {}
 
 type ProximaTimelocks struct {
-	Timelocks *TimelockList `json:"timelocks"`
-	Proof     *Proof        `json:"proof"`
+	Timelocks []*Timelock `json:"timelocks"`
+	Proof     *Proof      `json:"proof"`
 }
 
 func (ProximaTimelocks) IsProximaModel() {}
@@ -252,10 +250,6 @@ type Timelock struct {
 	Description *string `json:"description"`
 	Amount      *Coin   `json:"amount"`
 	Locktime    *string `json:"locktime"`
-}
-
-type TimelockList struct {
-	Timelocks []*Timelock `json:"timelocks"`
 }
 
 type Token struct {

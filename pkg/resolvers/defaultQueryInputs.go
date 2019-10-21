@@ -14,62 +14,81 @@ func GenerateInputs(inputs map[string]interface{}, defaultInputs map[string]inte
 
 
 var BlockStatsDefaultInputs = map[string]interface{} {
-  "prove": false,
+  "prove": true,
 }
 
 var FeesDefaultInputs  =  map[string]interface{}{
-  "prove": false,
+  "prove": true,
 }
 
-var AccountDefaultInputs = map[string]interface{} {
-  "address": "bnb1a03uvqmnqzl85csnxnsx2xy28m76gkkht46f2l",
-  "prove": false,
+var AtomicSwapDefaultInputs = map[string]interface{} {
+    "id": nil,
+    "prove": false,
 }
 
 var ValidatorsDefaultInputs = map[string]interface{} {
-  "prove": false,
+  "prove": true,
 }
 
 var TokensDefaultInputs = map[string]interface{} {
-  "prove": false,
+  "prove": true,
   "offset": 0,
   "limit": 1000,
 }
 
 var MarketsDefaultInputs = map[string]interface{} {
-  "prove": false,
+  "prove": true,
   "offset": 0,
   "limit": 1000,
 }
 
 var MarketTickersDefaultInputs = map[string]interface{} {
-  "prove": false,
+  "prove": true,
   "offset": 0,
   "limit": 1000,
 }
 
 var MarketTickerDefaultInputs = map[string]interface{} {
     "symbol": "RAVEN-F66_BNB",
-    "prove": false,
+    "prove": true,
 }
 
 var MarketDepthDefaultInputs = map[string]interface{} {
-    "symbol_pair": "RAVEN-F66_BNB",
-    "prove": false,
+    "symbol": "RAVEN-F66_BNB",
+    "prove": true,
 }
 
 var MarketCandleSticksDefaultInputs = map[string]interface{} {
-    "prove": false,
+  "symbol": "RAVEN-F66_BNB",
+  "interval": "5m",
+    "prove": true,
 }
 
 var OrderDefaultInputs = map[string]interface{} {
-    "orderId": "E0F7448E8D922D440C9020C7654D291D601B34A5",
-    "prove": false,
+    "orderId": "37D9383E6AD9AFEF6C5D8066ABA3ACA8C75D9F39-4017145",
+    "prove": true,
+}
+
+var TransactionDefaultInputs = map[string]interface{} {
+    "txHash": "A00D544D5640016D9B6B0D3F59E3AFC1D0157EF3D1C129758A791C135A3391A1",
+    "prove": true,
+}
+
+var AccountDefaultInputs = map[string]interface{} {
+  "address": "bnb1a03uvqmnqzl85csnxnsx2xy28m76gkkht46f2l",
+  "prove": true,
+}
+
+
+var TimelocksDefaultInputs = map[string]interface{} {
+    "address": "bnb1a03uvqmnqzl85csnxnsx2xy28m76gkkht46f2l",
+    "prove": true,
+    "id": nil,
 }
 
 var OrdersDefaultInputs = map[string]interface{} {
-    "prove": false,
-    "address": "414FB3BBA216AF84C47E07D6EBAA2DCFC3563A2F",
+    "prove": true,
+    "address": "bnb1a03uvqmnqzl85csnxnsx2xy28m76gkkht46f2l",
     "symbol": nil,
     "status": nil,
     "orderSide": nil,
@@ -79,26 +98,16 @@ var OrdersDefaultInputs = map[string]interface{} {
     "total": nil,
 }
 
-var TransactionDefaultInputs = map[string]interface{} {
-    "txHash": "A00D544D5640016D9B6B0D3F59E3AFC1D0157EF3D1C129758A791C135A3391A1",
-    "prove": false,
-}
-
 var TransactionsDefaultInputs = map[string]interface{} {
     "prove": false,
-    "address": "414FB3BBA216AF84C47E07D6EBAA2DCFC3563A2F",
+    "address": "bnb1urm5fr5djgk5grysyrrk2nffr4spkd999nl7u7",
     "txType": nil,
     "txSide": nil,
     "endTime": nil,
     "startTime": nil,
-    "blockHeight": "42250183",
+    "blockHeight": 42743260,
     "offset": 0,
     "limit": 1000,
-}
-
-var TradeDefaultInputs = map[string]interface{} {
-    "tradeId": nil,
-    "prove": false,
 }
 
 var TradesDefaultInputs = map[string]interface{} {
@@ -110,15 +119,10 @@ var TradesDefaultInputs = map[string]interface{} {
     "prove": false,
     "endTime": nil,
     "startTime": nil,
-    "blockHeight": "42250183",
+    "height": 42743260,
     "symbol": nil,
     "offset": 0,
     "limit": 1000,
-}
-
-var AtomicSwapDefaultInputs = map[string]interface{} {
-    "id": nil,
-    "prove": false,
 }
 
 var AtomicSwapsDefaultInputs = map[string]interface{} {
@@ -130,10 +134,4 @@ var AtomicSwapsDefaultInputs = map[string]interface{} {
   "offset": 0,
   "limit": 1000,
   "prove": false,
-}
-
-var TimelocksDefaultInputs = map[string]interface{} {
-    "address": nil,
-    "prove": false,
-    "id": nil,
 }

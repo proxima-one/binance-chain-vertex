@@ -19,11 +19,10 @@ type Query {
   marketDepth(symbol_pair: String, limit: Int, prove: Boolean): ProximaMarketDepth
   marketCandleSticks(symbol: String, startTime: String, endTime: String, interval: String, limit: Int, prove: Boolean): ProximaMarketCandleSticks
   trades(address: String, symbol: String, quoteAssetSymbol: String, blockHeight: String, startTime: String, endTime: String, buyerOrderId: String, sellerOrderId: String, orderSide: Int, limit: Int, offset: Int, prove: Boolean): [ProximaTrade]
-  trade(tradeId: String, prove: Boolean): ProximaTrade
   atomicSwaps(fromAddress: String, toAddress: String, startTime: String, endTime: String, limit: Int, offset: Int, prove: Boolean): [ProximaAtomicSwap]
   atomicSwap(id: String, prove: Boolean): ProximaAtomicSwap
   validators(prove: Boolean): ProximaValidators
-  timelocks(address: String, id: Int, prove: Boolean): ProximaTimelocks
+  timelocks(address: String, prove: Boolean): ProximaTimelocks
 }
 
 
@@ -160,8 +159,6 @@ type Transaction {
 }
 
 type ProximaMarketCandleSticks implements ProximaModel {
-  symbol: String
-  interval: String
   market_candlesticks: [CandleStick]
   proof: Proof
 }
@@ -254,7 +251,6 @@ type ProximaMarketDepth implements ProximaModel {
 }
 
 type MarketDepth {
-  symbol_pair: String
   bids: [String]
   asks: [String]
 }
@@ -296,12 +292,8 @@ type Validator {
 }
 
 type ProximaTimelocks implements ProximaModel {
-  timelocks: TimelockList
-  proof: Proof
-}
-
-type TimelockList {
   timelocks: [Timelock]
+  proof: Proof
 }
 
 type Timelock {
