@@ -4,18 +4,23 @@ package common
 
 
 var FetchTestCases = map[string]map[string]interface{}{
-  //"marketCandleSticks":MarketCandleSticksDefaultInputs,
-  //"transaction": TransactionDefaultInputs ,
-  //"transaction_tx":TransactionDefaultInputs,
-  //"order": OrderDefaultInputs,
- //"account":AccountDefaultInputs,
-//  "atomicSwap" ,
+  "marketCandleSticks":MarketCandleSticksDefaultInputs,
+  "transaction": TransactionDefaultInputs ,
+  "transaction_tx":TransactionDefaultInputs,
+  "order": OrderDefaultInputs,
+ "account":AccountDefaultInputs,
+ //"atomicSwap" ,
  //"timelocks": TimelocksDefaultInputs,
-  //"trades":TradesDefaultInputs ,
+  "trades":TradesDefaultInputs ,
   //"atomicSwaps": AtomicSwapsDefaultInputs,
-  //"transactions":TransactionsDefaultInputs,
-  //"marketDepth":MarketDepthDefaultInputs,
-  //"orders": OrdersDefaultInputs,
+//  "transactions":TransactionsDefaultInputs,
+  "marketDepth":MarketDepthDefaultInputs,
+  "orders": OrdersDefaultInputs,
+  "validators":make(map[string]interface{}),
+  "tokens":make(map[string]interface{}),
+  "markets":make(map[string]interface{}),
+  "fees":make(map[string]interface{}),
+  "marketTickers":make(map[string]interface{}),
   };
 
   var AccountDefaultInputs = map[string]interface{} {

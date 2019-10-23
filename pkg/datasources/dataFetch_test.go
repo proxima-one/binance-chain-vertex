@@ -3,7 +3,8 @@ package datasources
 import (
   "testing"
   "fmt"
-  "log"
+  //"log"
+  "time"
   helpers "github.com/proxima-one/binance-chain-subgraph/pkg/common"
 )
 
@@ -12,18 +13,18 @@ import (
 
 func TestFetch(t *testing.T) {
   baseUri := "https://dex.binance.org"
-  fmt.Println(helpers.FetchTestCases)
   for key, value := range helpers.FetchTestCases {
-    log.Println(key, value)
-    result, err := BinanceRequest(key, baseUri , value)
-    log.Println(string(result))
+    fmt.Println(key)
+    start := time.Now()
+    for i := 0; i < 5; i++ {
+    _, err := BinanceRequest(key, baseUri , value)
     if err != nil {
-      t.Error("Cannot batch values: ", err)
+      t.Error(err)
     }
-    val, tErr := BinanceTranslate(key, result)
-    if tErr != nil {
-      t.Error("Cannot batch values: ", tErr)
-    }
-    log.Println(val)
   }
+  end := time.Now()
+  elapsed := end.Sub(start)
+  fmt.Println(elapsed)
+  fmt.Println(elapsed/5)
+}
 }

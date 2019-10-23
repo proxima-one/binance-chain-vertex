@@ -2,28 +2,34 @@
 
 The Binance Chain Subgraph is intended to act as a server for the Binance chain.
 
-## Installation
+## Getting started
 
-### Docker
 
 ```
-docker pull chasesmith95/binance-chain-subgraph:latest
+git clone https://github.com/proxima-one/binance-chain-subgraph.git
 ```
 
+```
+docker-compose build .
+```
+
+```
+docker-compose up
+```
 
 ## Start
 
 Default server configuration:
 
+Graphql Playground:
 IP: `0.0.0.0`
-Port: `50051`
+Port: `4000`
 
-### Docker
-```
-docker run -p 50051:50051 chasesmith95/binance-chain-subgraph:latest
-```
+Graphql API endpoint:
+IP: `0.0.0.0`
+Port: `4000`
+Path: `/query`
 
 ## Usage
 
 - [Binance Client]()
-- [Proxima Client]()

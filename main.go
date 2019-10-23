@@ -46,7 +46,7 @@ func SetDataloader(c *cache.Cache, db *proxima.ProximaDB, ds *datasource.Datasou
 
 func SetupResolver() (gql.Config) {
 	dbConfig := make(map[string]string)
-	dbConfig["ip"] = "0.0.0.0"//"db"
+	dbConfig["ip"] = "db" //"0.0.0.0"
 	dbConfig["port"] = "50051"
 	proximaDB, _ := SetupDB(datasource.BinanceTableList, dbConfig)
 	datasourceConfig := make(map[string]string)

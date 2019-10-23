@@ -4,7 +4,7 @@ import (
   "net/http"
   "io/ioutil"
     json "github.com/json-iterator/go"
-  "fmt"
+  //"fmt"
 )
 
 func  (d *Datasource) AccountFetch(args map[string]interface{}) (map[string]interface{}, error){
@@ -168,10 +168,6 @@ func (ds *Datasource) FeesFetch() ([]map[string]interface{}, error) {
 
 func (ds *Datasource) DataRequest(requestType string, args map[string]interface{}) (interface{}, error) {
   resp, err := BinanceRequest(requestType, ds.baseUri, args)
-  if requestType == "marketCandleSticks" {
-    fmt.Println("Binance Request")
-    fmt.Println(string(resp))
-  }
   if err != nil {
     return nil, err
   }

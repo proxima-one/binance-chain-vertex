@@ -4,17 +4,8 @@ services:
     build: .
     ports:
       - "4000:4000"
-    links:
-      - db
-    networks:
-      - backend
   db:
     image: chasesmith95/proxima-db-server:latest
     container_name: proxima-db
     ports:
       - "50051:50051"
-    networks:
-      - backend
-networks:
-  backend:
-    driver: "bridge"
