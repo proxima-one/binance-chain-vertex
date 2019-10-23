@@ -87,9 +87,13 @@ type Market struct {
 }
 
 type MarketDepth struct {
-	SymbolPair *string   `json:"symbol_pair"`
-	Bids       []*string `json:"bids"`
-	Asks       []*string `json:"asks"`
+	Bids []*MarketDepthOrder `json:"bids"`
+	Asks []*MarketDepthOrder `json:"asks"`
+}
+
+type MarketDepthOrder struct {
+	Price *string `json:"price"`
+	Qty   *string `json:"qty"`
 }
 
 type MarketTicker struct {

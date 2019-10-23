@@ -251,8 +251,13 @@ type ProximaMarketDepth implements ProximaModel {
 }
 
 type MarketDepth {
-  bids: [String]
-  asks: [String]
+  bids: [MarketDepthOrder]
+  asks: [MarketDepthOrder]
+}
+
+type MarketDepthOrder {
+  price: String
+  qty: String
 }
 
 type ProximaAtomicSwap {

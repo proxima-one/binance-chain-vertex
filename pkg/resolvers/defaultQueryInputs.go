@@ -61,7 +61,7 @@ var MarketDepthDefaultInputs = map[string]interface{} {
 var MarketCandleSticksDefaultInputs = map[string]interface{} {
   "symbol": "RAVEN-F66_BNB",
   "interval": "5m",
-    "prove": true,
+  "prove": true,
 }
 
 var OrderDefaultInputs = map[string]interface{} {
@@ -105,7 +105,7 @@ var TransactionsDefaultInputs = map[string]interface{} {
     "txSide": nil,
     "endTime": nil,
     "startTime": nil,
-    "blockHeight": 42743260,
+    "blockHeight": nil,
     "offset": 0,
     "limit": 1000,
 }
@@ -119,7 +119,7 @@ var TradesDefaultInputs = map[string]interface{} {
     "prove": false,
     "endTime": nil,
     "startTime": nil,
-    "height": 42743260,
+    "height": nil,
     "symbol": nil,
     "offset": 0,
     "limit": 1000,

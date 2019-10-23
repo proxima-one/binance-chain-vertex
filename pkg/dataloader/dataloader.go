@@ -6,11 +6,11 @@ import (
   models "github.com/proxima-one/binance-chain-subgraph/pkg/models"
   json "github.com/json-iterator/go"
   proxima "github.com/proxima-one/proxima-db-client-go"
-
+  //"log"
   //"time"
+
 )
 
-//gets added context
 type Dataloader struct{
 	db *proxima.ProximaDB
   cache *cache.Cache
@@ -188,6 +188,8 @@ func (d *Dataloader) LoadProximaTransactions(args map[string]interface{}) ([]*mo
   if err != nil {
     return nil, err
   }
+
+  //log.Println(string(result))
   value := []*models.Transaction{}
   json.Unmarshal(result, &value)
   proof:= models.Proof{Proof: nil,  Root: nil}
@@ -209,12 +211,13 @@ func (d *Dataloader) LoadProximaAtomicSwap(args map[string]interface{}) (*models
   atomicSwap :=  &models.ProximaAtomicSwap{AtomicSwap: &value, Proof: &proof}
   return atomicSwap, nil
 }
-//AtomicSwap //No cache, No DB NOTDONE
+
 func (d *Dataloader) LoadProximaAtomicSwaps(args map[string]interface{}) ([]*models.ProximaAtomicSwap, error) {
   result, err := d.datasource.AtomicSwapsFetch(args)
   if err != nil {
     return nil, err
   }
+  //log.Println(result)
   value := []*models.AtomicSwap{}
   json.Unmarshal(result, &value)
   proof:= models.Proof{Proof: nil,  Root: nil}
@@ -238,12 +241,13 @@ func (d *Dataloader) LoadProximaOrder(args map[string]interface{}) (*models.Prox
   order :=  &models.ProximaOrder{Order: &value, Proof: &proof}
   return order, nil
 }
-//Orders //No Cache, No DB
+
 func (d *Dataloader) LoadProximaOrders(args map[string]interface{}) ([]*models.ProximaOrder, error) {
   result, err := d.datasource.OrdersFetch(args)
   if err != nil {
     return nil, err
   }
+  //log.Println(result)
   value := []*models.Order{}
   json.Unmarshal(result, &value)
   proof:= models.Proof{Proof: nil,  Root: nil}
@@ -267,7 +271,7 @@ func (d *Dataloader) LoadProximaAccount(args map[string]interface{}) (*models.Pr
   account :=  &models.ProximaAccount{Account: &value, Proof: &proof}
   return account, nil
 }
-//Trades //Cache, DB
+
 func (d *Dataloader) LoadProximaTrades(args map[string]interface{}) ([]*models.ProximaTrade, error) {
   result, err := d.datasource.TradesFetch(args)
   if err != nil {

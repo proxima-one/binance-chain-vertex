@@ -123,9 +123,13 @@ type ComplexityRoot struct {
 	}
 
 	MarketDepth struct {
-		Asks       func(childComplexity int) int
-		Bids       func(childComplexity int) int
-		SymbolPair func(childComplexity int) int
+		Asks func(childComplexity int) int
+		Bids func(childComplexity int) int
+	}
+
+	MarketDepthOrder struct {
+		Price func(childComplexity int) int
+		Qty   func(childComplexity int) int
 	}
 
 	MarketTicker struct {
@@ -760,12 +764,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.MarketDepth.Bids(childComplexity), true
 
-	case "MarketDepth.symbol_pair":
-		if e.complexity.MarketDepth.SymbolPair == nil {
+	case "MarketDepthOrder.price":
+		if e.complexity.MarketDepthOrder.Price == nil {
 			break
 		}
 
-		return e.complexity.MarketDepth.SymbolPair(childComplexity), true
+		return e.complexity.MarketDepthOrder.Price(childComplexity), true
+
+	case "MarketDepthOrder.qty":
+		if e.complexity.MarketDepthOrder.Qty == nil {
+			break
+		}
+
+		return e.complexity.MarketDepthOrder.Qty(childComplexity), true
 
 	case "MarketTicker.askPrice":
 		if e.complexity.MarketTicker.AskPrice == nil {
@@ -2104,9 +2115,13 @@ type ProximaMarketDepth implements ProximaModel {
 }
 
 type MarketDepth {
-  symbol_pair: String
-  bids: [String]
-  asks: [String]
+  bids: [MarketDepthOrder]
+  asks: [MarketDepthOrder]
+}
+
+type MarketDepthOrder {
+  price: String
+  qty: String
 }
 
 type ProximaAtomicSwap {
@@ -4712,40 +4727,6 @@ func (ec *executionContext) _Market_lot_size(ctx context.Context, field graphql.
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _MarketDepth_symbol_pair(ctx context.Context, field graphql.CollectedField, obj *models.MarketDepth) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "MarketDepth",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.SymbolPair, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _MarketDepth_bids(ctx context.Context, field graphql.CollectedField, obj *models.MarketDepth) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -4774,10 +4755,10 @@ func (ec *executionContext) _MarketDepth_bids(ctx context.Context, field graphql
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*string)
+	res := resTmp.([]*models.MarketDepthOrder)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOString2ᚕᚖstring(ctx, field.Selections, res)
+	return ec.marshalOMarketDepthOrder2ᚕᚖgithubᚗcomᚋproximaᚑoneᚋbinanceᚑchainᚑsubgraphᚋpkgᚋmodelsᚐMarketDepthOrder(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _MarketDepth_asks(ctx context.Context, field graphql.CollectedField, obj *models.MarketDepth) (ret graphql.Marshaler) {
@@ -4808,10 +4789,78 @@ func (ec *executionContext) _MarketDepth_asks(ctx context.Context, field graphql
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*string)
+	res := resTmp.([]*models.MarketDepthOrder)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOString2ᚕᚖstring(ctx, field.Selections, res)
+	return ec.marshalOMarketDepthOrder2ᚕᚖgithubᚗcomᚋproximaᚑoneᚋbinanceᚑchainᚑsubgraphᚋpkgᚋmodelsᚐMarketDepthOrder(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _MarketDepthOrder_price(ctx context.Context, field graphql.CollectedField, obj *models.MarketDepthOrder) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "MarketDepthOrder",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Price, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _MarketDepthOrder_qty(ctx context.Context, field graphql.CollectedField, obj *models.MarketDepthOrder) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "MarketDepthOrder",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Qty, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _MarketTicker_askPrice(ctx context.Context, field graphql.CollectedField, obj *models.MarketTicker) (ret graphql.Marshaler) {
@@ -11140,12 +11189,36 @@ func (ec *executionContext) _MarketDepth(ctx context.Context, sel ast.SelectionS
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("MarketDepth")
-		case "symbol_pair":
-			out.Values[i] = ec._MarketDepth_symbol_pair(ctx, field, obj)
 		case "bids":
 			out.Values[i] = ec._MarketDepth_bids(ctx, field, obj)
 		case "asks":
 			out.Values[i] = ec._MarketDepth_asks(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var marketDepthOrderImplementors = []string{"MarketDepthOrder"}
+
+func (ec *executionContext) _MarketDepthOrder(ctx context.Context, sel ast.SelectionSet, obj *models.MarketDepthOrder) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, marketDepthOrderImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("MarketDepthOrder")
+		case "price":
+			out.Values[i] = ec._MarketDepthOrder_price(ctx, field, obj)
+		case "qty":
+			out.Values[i] = ec._MarketDepthOrder_qty(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -13006,6 +13079,57 @@ func (ec *executionContext) marshalOMarketDepth2ᚖgithubᚗcomᚋproximaᚑone�
 	return ec._MarketDepth(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOMarketDepthOrder2githubᚗcomᚋproximaᚑoneᚋbinanceᚑchainᚑsubgraphᚋpkgᚋmodelsᚐMarketDepthOrder(ctx context.Context, sel ast.SelectionSet, v models.MarketDepthOrder) graphql.Marshaler {
+	return ec._MarketDepthOrder(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOMarketDepthOrder2ᚕᚖgithubᚗcomᚋproximaᚑoneᚋbinanceᚑchainᚑsubgraphᚋpkgᚋmodelsᚐMarketDepthOrder(ctx context.Context, sel ast.SelectionSet, v []*models.MarketDepthOrder) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOMarketDepthOrder2ᚖgithubᚗcomᚋproximaᚑoneᚋbinanceᚑchainᚑsubgraphᚋpkgᚋmodelsᚐMarketDepthOrder(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOMarketDepthOrder2ᚖgithubᚗcomᚋproximaᚑoneᚋbinanceᚑchainᚑsubgraphᚋpkgᚋmodelsᚐMarketDepthOrder(ctx context.Context, sel ast.SelectionSet, v *models.MarketDepthOrder) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._MarketDepthOrder(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalOMarketTicker2githubᚗcomᚋproximaᚑoneᚋbinanceᚑchainᚑsubgraphᚋpkgᚋmodelsᚐMarketTicker(ctx context.Context, sel ast.SelectionSet, v models.MarketTicker) graphql.Marshaler {
 	return ec._MarketTicker(ctx, sel, &v)
 }
@@ -13450,38 +13574,6 @@ func (ec *executionContext) unmarshalOString2string(ctx context.Context, v inter
 
 func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
 	return graphql.MarshalString(v)
-}
-
-func (ec *executionContext) unmarshalOString2ᚕᚖstring(ctx context.Context, v interface{}) ([]*string, error) {
-	var vSlice []interface{}
-	if v != nil {
-		if tmp1, ok := v.([]interface{}); ok {
-			vSlice = tmp1
-		} else {
-			vSlice = []interface{}{v}
-		}
-	}
-	var err error
-	res := make([]*string, len(vSlice))
-	for i := range vSlice {
-		res[i], err = ec.unmarshalOString2ᚖstring(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) marshalOString2ᚕᚖstring(ctx context.Context, sel ast.SelectionSet, v []*string) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	for i := range v {
-		ret[i] = ec.marshalOString2ᚖstring(ctx, sel, v[i])
-	}
-
-	return ret
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

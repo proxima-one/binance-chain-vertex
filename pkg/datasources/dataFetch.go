@@ -3,7 +3,7 @@ package datasources
 import (
   "net/http"
   "io/ioutil"
-
+    json "github.com/json-iterator/go"
   "fmt"
 )
 
@@ -29,7 +29,8 @@ func  (d *Datasource) OrdersFetch(args map[string]interface{}) ([]byte, error) {
   if err != nil {
     return nil, err
   }
-  return []byte(fmt.Sprintf("%v", interface{}(orders))), nil
+  byteValue, _ := json.Marshal(orders)
+  return []byte(byteValue), nil
 }
 
 func (d *Datasource) TradesFetch(args map[string]interface{}) ([]byte, error) {
@@ -37,14 +38,13 @@ func (d *Datasource) TradesFetch(args map[string]interface{}) ([]byte, error) {
   if err != nil {
     return nil, err
   }
-  return []byte(fmt.Sprintf("%v", interface{}(trades))), nil
+  byteValue, _ := json.Marshal(trades)
+  return []byte(byteValue), nil
 }
 
 func (d *Datasource) MarketCandlesticksFetch(args map[string]interface{}) ([]map[string]interface{}, error) {
   ms, err := d.DataRequest("marketCandleSticks", args)
-
-  if err != nil {
-    fmt.Println(err)
+  if err != nil || ms == nil {
     return nil, err
   }
   marketCandleSticks := ms.([]map[string]interface{})
@@ -66,7 +66,8 @@ func  (d *Datasource) TransactionsFetch(args map[string]interface{}) ([]byte, er
   if err != nil {
     return nil, err
   }
-  return []byte(fmt.Sprintf("%v", interface{}(transactions))), nil
+  byteValue, _ := json.Marshal(transactions)
+  return []byte(byteValue), nil
 }
 
 func (ds *Datasource) MarketTickersFetch() ([]map[string]interface{}, error) {
@@ -102,7 +103,8 @@ func (d *Datasource)  AtomicSwapsFetch(args map[string]interface{})([]byte, erro
   if err != nil {
     return nil, err
   }
-  return atomicSwaps.([]byte), nil
+  byteValue, _ := json.Marshal(atomicSwaps)
+  return []byte(byteValue), nil
 }
 
 func  (d *Datasource) TimelockFetch(args map[string]interface{}) ([]byte, error){
@@ -166,6 +168,10 @@ func (ds *Datasource) FeesFetch() ([]map[string]interface{}, error) {
 
 func (ds *Datasource) DataRequest(requestType string, args map[string]interface{}) (interface{}, error) {
   resp, err := BinanceRequest(requestType, ds.baseUri, args)
+  if requestType == "marketCandleSticks" {
+    fmt.Println("Binance Request")
+    fmt.Println(string(resp))
+  }
   if err != nil {
     return nil, err
   }

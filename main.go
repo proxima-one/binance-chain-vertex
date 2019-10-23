@@ -82,9 +82,12 @@ func main() {
 	if port == "" {
 		port = defaultPort
 	}
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
-r.POST("/query", graphqlHandler())
-r.GET("/", playgroundHandler())
+
+	go r.POST("/query", graphqlHandler())
+	//go r.GET("/query", graphqlHandler())
+	go r.GET("/", playgroundHandler())
 	//fmt.Println("Test with Get      : curl -g 'http://localhost:4000/graphql?query={hello}'")
 	r.Run(":4000")
 

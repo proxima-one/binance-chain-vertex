@@ -11,11 +11,11 @@ var FetchTestCases = map[string]map[string]interface{}{
  //"account":AccountDefaultInputs,
 //  "atomicSwap" ,
  //"timelocks": TimelocksDefaultInputs,
-  "trades":TradesDefaultInputs ,
+  //"trades":TradesDefaultInputs ,
   //"atomicSwaps": AtomicSwapsDefaultInputs,
-  "transactions":TransactionsDefaultInputs,
+  //"transactions":TransactionsDefaultInputs,
   //"marketDepth":MarketDepthDefaultInputs,
-  "orders": OrdersDefaultInputs,
+  //"orders": OrdersDefaultInputs,
   };
 
   var AccountDefaultInputs = map[string]interface{} {
@@ -64,7 +64,7 @@ var FetchTestCases = map[string]map[string]interface{}{
 
   var TransactionsDefaultInputs = map[string]interface{} {
       "prove": false,
-      "address": "bnb1urm5fr5djgk5grysyrrk2nffr4spkd999nl7u7",
+      "address": nil,
       "txType": nil,
       "txSide": nil,
       "endTime": nil,

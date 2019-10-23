@@ -40,7 +40,7 @@ func (ds *Datasource) DynamicUpdates() {
   for {
     go ds.MarketUpdates()
     blockStats, err := ds.BlockStatsFetch() //err
-    if err == nil {
+    if err == nil && blockStats["latest_block_height"] != nil {
       blockHeight := blockStats["latest_block_height"].(string)
       go ds.TransactionUpdates(blockHeight)
       go ds.UpdateTrades(blockHeight)
