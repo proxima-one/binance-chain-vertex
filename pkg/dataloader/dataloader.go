@@ -30,7 +30,10 @@ func (d *Dataloader) LoadProximaBlockStats(args map[string]interface{}) (*models
   if cached, found := d.cache.Get("BlockStats"); found {
 		result = cached.(*proxima.ProximaDBResult)
   } else {
-    result, _ = d.db.Get(datasources.Primary, "BlockStats", args)
+    result, err := d.db.Get(datasources.Primary, "BlockStats", args)
+    if err != nil {
+      return nil, err
+    }
     d.cache.Set("BlockStats", result, BlockStatsCacheExpiration)
   }
     value := models.BlockStats{}
@@ -46,7 +49,10 @@ func (d *Dataloader) LoadProximaTokens(args map[string]interface{}) (*models.Pro
   if cached, found := d.cache.Get("Tokens"); found {
     result = cached.(*proxima.ProximaDBResult)
   } else {
-    result, _ = d.db.Get(datasources.Primary, "Tokens", args)
+    result, err := d.db.Get(datasources.Primary, "Tokens", args)
+    if err != nil {
+      return nil, err
+    }
     d.cache.Set("Tokens", result, TokensCacheExpiration)
     }
   	value := []*models.Token{}
@@ -61,7 +67,10 @@ func (d *Dataloader) LoadProximaTokens(args map[string]interface{}) (*models.Pro
   if cached, found := d.cache.Get("Fees"); found {
     result= cached.(*proxima.ProximaDBResult)
   } else {
-    result, _ = d.db.Get(datasources.Primary, "Fees", args)
+    result, err := d.db.Get(datasources.Primary, "Fees", args)
+    if err != nil {
+      return nil, err
+    }
     d.cache.Set("Fees", result, FeesCacheExpiration)
     }
   	value := []*models.Fee{}
@@ -76,7 +85,10 @@ func (d *Dataloader) LoadProximaValidators(args map[string]interface{}) (*models
 if cached, found := d.cache.Get("Validators"); found {
   result = cached.(*proxima.ProximaDBResult)
 } else {
-  result, _ = d.db.Get(datasources.Primary, "Validators", args)
+  result, err := d.db.Get(datasources.Primary, "Validators", args)
+  if err != nil {
+    return nil, err
+  }
   d.cache.Set("Validators", result, ValidatorsCacheExpiration)
   }
   value := []*models.Validator{}
@@ -91,7 +103,10 @@ func (d *Dataloader) LoadProximaMarkets(args map[string]interface{}) (*models.Pr
 if cached, found := d.cache.Get("Markets"); found {
   result = cached.(*proxima.ProximaDBResult)
 } else {
-  result, _ = d.db.Get(datasources.Primary, "Markets", map[string]interface{}(args))
+  result, err := d.db.Get(datasources.Primary, "Markets", map[string]interface{}(args))
+  if err != nil {
+    return nil, err
+  }
   d.cache.Set("Markets", result, MarketsCacheExpiration)
   }
   value := []*models.Market{}
@@ -106,7 +121,10 @@ func (d *Dataloader) LoadProximaMarketTickers(args map[string]interface{}) (*mod
 if cached, found := d.cache.Get("MarketTickers"); found {
   result= cached.(*proxima.ProximaDBResult)
 } else {
-  result, _ = d.db.Get(datasources.Primary, "MarketTickers", map[string]interface{}(args))
+  result, err := d.db.Get(datasources.Primary, "MarketTickers", map[string]interface{}(args))
+  if err != nil {
+    return nil, err
+  }
   d.cache.Set("MarketTickers", result, MarketTickersCacheExpiration)
   }
   value := []*models.MarketTicker{}
@@ -121,7 +139,10 @@ func (d *Dataloader) LoadProximaMarketTicker(args map[string]interface{}) (*mode
 if cached, found := d.cache.Get("MarketTicker" + args["symbol"].(string)); found {
   result = cached.(*proxima.ProximaDBResult)
 } else {
-    result, _ = d.db.Get(datasources.MarketTickersBySymbol, args["symbol"], args)
+    result, err := d.db.Get(datasources.MarketTickersBySymbol, args["symbol"], args)
+    if err != nil {
+      return nil, err
+    }
     d.cache.Set("MarketTicker" + args["symbol"].(string), result, MarketTickerCacheExpiration)
   }
   value := models.MarketTicker{}

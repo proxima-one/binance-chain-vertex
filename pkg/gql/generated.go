@@ -336,10 +336,10 @@ type ComplexityRoot struct {
 	}
 
 	Validator struct {
-		Accum       func(childComplexity int) int
-		Address     func(childComplexity int) int
-		PubKey      func(childComplexity int) int
-		VotingPower func(childComplexity int) int
+		Address          func(childComplexity int) int
+		ProposerPriority func(childComplexity int) int
+		PubKey           func(childComplexity int) int
+		VotingPower      func(childComplexity int) int
 	}
 }
 
@@ -1785,19 +1785,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Transaction.Value(childComplexity), true
 
-	case "Validator.accum":
-		if e.complexity.Validator.Accum == nil {
-			break
-		}
-
-		return e.complexity.Validator.Accum(childComplexity), true
-
 	case "Validator.address":
 		if e.complexity.Validator.Address == nil {
 			break
 		}
 
 		return e.complexity.Validator.Address(childComplexity), true
+
+	case "Validator.proposer_priority":
+		if e.complexity.Validator.ProposerPriority == nil {
+			break
+		}
+
+		return e.complexity.Validator.ProposerPriority(childComplexity), true
 
 	case "Validator.pub_key":
 		if e.complexity.Validator.PubKey == nil {
@@ -2155,9 +2155,9 @@ type ProximaValidators implements ProximaModel {
 
 type Validator {
   address: String
-  pub_key: String
+  pub_key: [Int]
   voting_power: Int
-  accum: Int
+  proposer_priority: Int
 }
 
 type ProximaTimelocks implements ProximaModel {
@@ -9580,10 +9580,10 @@ func (ec *executionContext) _Validator_pub_key(ctx context.Context, field graphq
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.([]*int)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOInt2ᚕᚖint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Validator_voting_power(ctx context.Context, field graphql.CollectedField, obj *models.Validator) (ret graphql.Marshaler) {
@@ -9620,7 +9620,7 @@ func (ec *executionContext) _Validator_voting_power(ctx context.Context, field g
 	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Validator_accum(ctx context.Context, field graphql.CollectedField, obj *models.Validator) (ret graphql.Marshaler) {
+func (ec *executionContext) _Validator_proposer_priority(ctx context.Context, field graphql.CollectedField, obj *models.Validator) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -9639,7 +9639,7 @@ func (ec *executionContext) _Validator_accum(ctx context.Context, field graphql.
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Accum, nil
+		return obj.ProposerPriority, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -12207,8 +12207,8 @@ func (ec *executionContext) _Validator(ctx context.Context, sel ast.SelectionSet
 			out.Values[i] = ec._Validator_pub_key(ctx, field, obj)
 		case "voting_power":
 			out.Values[i] = ec._Validator_voting_power(ctx, field, obj)
-		case "accum":
-			out.Values[i] = ec._Validator_accum(ctx, field, obj)
+		case "proposer_priority":
+			out.Values[i] = ec._Validator_proposer_priority(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

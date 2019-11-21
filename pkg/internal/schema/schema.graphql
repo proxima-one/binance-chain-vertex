@@ -291,9 +291,9 @@ type ProximaValidators implements ProximaModel {
 
 type Validator {
   address: String
-  pub_key: String
+  pub_key: [Int]
   voting_power: Int
-  accum: Int
+  proposer_priority: Int
 }
 
 type ProximaTimelocks implements ProximaModel {

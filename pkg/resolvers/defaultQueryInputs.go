@@ -31,7 +31,7 @@ var ValidatorsDefaultInputs = map[string]interface{} {
 }
 
 var TokensDefaultInputs = map[string]interface{} {
-  "prove": true,
+  "prove": false,
   "offset": 0,
   "limit": 1000,
 }

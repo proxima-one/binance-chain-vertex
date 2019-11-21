@@ -74,7 +74,7 @@ var FetchTestCases = map[string]map[string]interface{}{
       "txSide": nil,
       "endTime": nil,
       "startTime": nil,
-      "blockHeight": 42743260,
+      "blockHeight": 52743260,
       "offset": 0,
       "limit": 1000,
   }

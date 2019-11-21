@@ -305,8 +305,8 @@ type Transaction struct {
 }
 
 type Validator struct {
-	Address     *string `json:"address"`
-	PubKey      *string `json:"pub_key"`
-	VotingPower *int    `json:"voting_power"`
-	Accum       *int    `json:"accum"`
+	Address          *string `json:"address"`
+	PubKey           []*int  `json:"pub_key"`
+	VotingPower      *int    `json:"voting_power"`
+	ProposerPriority *int    `json:"proposer_priority"`
 }

@@ -25,7 +25,7 @@ func (ds *Datasource) Start() {
 }
 
 func (ds *Datasource) StaticUpdates() {
-    static_interval := 24*time.Hour
+    static_interval := 50*time.Second
   for {
       go ds.FeesFetch()
       go ds.ValidatorsFetch()
@@ -39,7 +39,7 @@ func (ds *Datasource) DynamicUpdates() {
   dynamic_interval := 5*time.Second
   for {
     go ds.MarketUpdates()
-    blockStats, err := ds.BlockStatsFetch() //err
+    blockStats, err := ds.BlockStatsFetch()
     if err == nil && blockStats["latest_block_height"] != nil {
       blockHeight := blockStats["latest_block_height"].(string)
       go ds.TransactionUpdates(blockHeight)
@@ -73,7 +73,7 @@ func (ds *Datasource) MarketUpdates() (bool, error) {
 func (ds *Datasource) UpdateTrades(height string) (bool, error){
   args := make(map[string]interface{});
   args["height"] = height
-  trades, err := ds.DataRequest("trade", args)
+  trades, err := ds.DataRequest("trades", args)
   if err != nil {
     return false, err
   }
@@ -81,7 +81,16 @@ func (ds *Datasource) UpdateTrades(height string) (bool, error){
   tradesBySellerId := make(map[string]interface{});
   tradesByBuyerId := make(map[string]interface{});
   for _, trade := range trades.([]map[string]interface{}) {
-    ds.proximaDB.Set(TradesByTradeId, trade["tradeId"], trade, args)
+    ds.proximaDB.Set(TradesByTradeId, trade["tradeId"].(string), trade, args)
+    if tradesByTime[trade["time"].(string)] == nil {
+      tradesByTime[trade["time"].(string)] = make([]interface{}, 0)
+    }
+    if tradesByBuyerId[trade["buyerId"].(string)] == nil {
+      tradesByBuyerId[trade["buyerId"].(string)] = make([]interface{}, 0)
+    }
+    if tradesBySellerId[trade["sellerId"].(string)] == nil {
+      tradesBySellerId[trade["sellerId"].(string)] = make([]interface{}, 0)
+    }
     tradesByTime[trade["time"].(string)] = append(tradesByTime[trade["time"].(string)].([]interface{}), trade)
     tradesByBuyerId[trade["buyerId"].(string)] = append(tradesByBuyerId[trade["buyerId"].(string)].([]interface{}), trade)
     tradesBySellerId[trade["sellerId"].(string)] = append(tradesBySellerId[trade["sellerId"].(string)].([]interface{}), trade)
@@ -96,7 +105,7 @@ func (ds *Datasource) TransactionUpdates(blockHeight string)  (bool, error)  {
   args := make(map[string]interface{});
   args["blockHeight"] = blockHeight
   txs, err := ds.DataRequest("transaction", args)
-  if err != nil {
+  if err != nil || txs == nil {
     return false, err
   }
   transactions := txs.([]map[string]interface{})
@@ -112,7 +121,17 @@ func (ds *Datasource) TransactionUpdates(blockHeight string)  (bool, error)  {
     accounts[transaction["fromAddr"].(string)] = true
     accounts[transaction["toAddr"].(string)] = true
     orderIds[transaction["orderId"].(string)] = true
+    if transactionsByTimeStamp[transaction["timeStamp"].(string)] == nil {
+      transactionsByTimeStamp[transaction["timeStamp"].(string)] = make([]interface{}, 0)
+    }
 
+    if transactionsByFromAddr[transaction["fromAddr"].(string)] == nil {
+      transactionsByFromAddr[transaction["fromAddr"].(string)] = make([]interface{}, 0)
+    }
+
+    if transactionsByToAddr[transaction["toAddr"].(string)] == nil {
+      transactionsByToAddr[transaction["toAddr"].(string)] = make([]interface{}, 0)
+    }
     transactionsByTimeStamp[transaction["timeStamp"].(string)] = append(transactionsByTimeStamp[transaction["timeStamp"].(string)].([]interface{}), transaction)
     transactionsByFromAddr[transaction["fromAddr"].(string)] = append(transactionsByFromAddr[transaction["fromAddr"].(string)].([]interface{}), transaction)
     transactionsByToAddr[transaction["toAddr"].(string)] = append(transactionsByToAddr[transaction["toAddr"].(string)].([]interface{}), transaction)
@@ -131,9 +150,11 @@ func (ds *Datasource) TransactionUpdates(blockHeight string)  (bool, error)  {
 func (ds *Datasource) UpdateData(table_name string, dataMap map[string]interface{}) (bool, error) {
   args:= make(map[string]interface{})
   for key, value := range dataMap {
-    result, _ := ds.proximaDB.Get(table_name, key, args) //get the value
+    result, _ := ds.proximaDB.Get(table_name, key, args)
     val := make([]interface{}, 0)
-    json.Unmarshal(result.GetValue(), &val)
+    if result != nil {
+      json.Unmarshal(result.GetValue(), &val)
+    }
     value = append(val, value)
     ds.proximaDB.Set(table_name, key, value, args)
   }

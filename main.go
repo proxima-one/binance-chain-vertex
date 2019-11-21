@@ -1,8 +1,6 @@
 package main
 
 import (
-	//"log"
-	//"net/http"
 	"github.com/gin-gonic/gin"
 	"os"
 	_ "context"
@@ -17,51 +15,19 @@ import (
 	"time"
 )
 
-const defaultPort = "4000"
-
-func SetupDB(tableList []string, config map[string]string) (*proxima.ProximaDB, error) {
-	proximaDB := proxima.NewProximaDB(config["ip"], config["port"])
-	_, err := proximaDB.OpenAll(tableList)
-	if err != nil {
-		return proximaDB, err
-	}
-	return proximaDB, nil
+func main() {
+	gin.SetMode(gin.ReleaseMode)
+	r := gin.Default()
+	go r.POST("/query", BinanceSubgraphServer())
+	go r.GET("/", playgroundHandler())
+	r.Run(":4000")
 }
 
-func SetupDatasource(db *proxima.ProximaDB, config map[string]string) (*datasource.Datasource, error) {
-	ds, err := datasource.NewDatasource(db, config["uri"])
-	if err != nil {
-		return nil, err
-	}
-	return ds, nil
-}
-
-func SetDataloader(c *cache.Cache, db *proxima.ProximaDB, ds *datasource.Datasource, config map[string]string) (*dataloader.Dataloader, error) {
-	loader , err:= dataloader.NewDataloader(c, db, ds)
-	if err != nil {
-		return nil, err
-	}
-	return loader, nil
-}
-
-func SetupResolver() (gql.Config) {
-	dbConfig := make(map[string]string)
-	dbConfig["ip"] = "db" //"0.0.0.0"
-	dbConfig["port"] = "50051"
-	proximaDB, _ := SetupDB(datasource.BinanceTableList, dbConfig)
-	datasourceConfig := make(map[string]string)
-	datasourceConfig["uri"] = "https://dex.binance.org"
-	ds, _:= SetupDatasource(proximaDB, datasourceConfig)
-	go ds.Start()
-	c := cache.New(5*time.Minute, 10*time.Minute)
-	loader, _  := SetDataloader(c, proximaDB, ds, dbConfig)
-	return resolver.NewResolver(loader)
-}
-
-func graphqlHandler() gin.HandlerFunc {
-		resolver := SetupResolver()
-	h := handler.GraphQL(gql.NewExecutableSchema(resolver))
-
+func BinanceSubgraphServer() gin.HandlerFunc {
+	db, _ := StartDatabase(datasource.BinanceTableList)
+	ds, _ := StartBinanceDatasource(db)
+	subgraphResolvers := CreateResolvers(db, ds)
+		h := handler.GraphQL(gql.NewExecutableSchema(subgraphResolvers))
 	return func(c *gin.Context) {
 		h.ServeHTTP(c.Writer, c.Request)
 	}
@@ -69,37 +35,55 @@ func graphqlHandler() gin.HandlerFunc {
 
 func playgroundHandler() gin.HandlerFunc {
 	h := handler.Playground("GraphQL", "/query")
-
 	return func(c *gin.Context) {
 		h.ServeHTTP(c.Writer, c.Request)
 	}
 }
 
-func main() {
+func CreateResolvers(db *proxima.ProximaDB, ds *datasource.Datasource) (gql.Config) {
+	c := cache.New(5*time.Minute, 10*time.Minute)
+	loader, _  := SetDataloader(c, db, ds)
+	return resolver.NewResolver(loader)
+}
 
-
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = defaultPort
+func StartDatabase(tableList []string) (*proxima.ProximaDB, error) {
+	ip := getEnv("DB_ADDRESS" , "0.0.0.0")
+	port :=  getEnv("DB_PORT", "50051")
+	proximaDB := proxima.NewProximaDB(ip, port)
+	_, err := proximaDB.OpenAll(tableList)
+	if err != nil {
+		return proximaDB, err
 	}
-	gin.SetMode(gin.ReleaseMode)
-	r := gin.Default()
+	return proximaDB, nil
+}
 
-	go r.POST("/query", graphqlHandler())
-	//go r.GET("/query", graphqlHandler())
-	go r.GET("/", playgroundHandler())
-	//fmt.Println("Test with Get      : curl -g 'http://localhost:4000/graphql?query={hello}'")
-	r.Run(":4000")
+func StartBinanceDatasource(db *proxima.ProximaDB) (*datasource.Datasource, error) {
+	ip := getEnv("BINANCE_NODE_ADDRESS" , "dex.binance.org")
+	port :=  getEnv("BINANCE_NODE_PORT", "")
+	uri := "https://"
+	uri = uri + ip
+	if len(port) > 0 {
+		uri = "http://" + ip + ":" + port
+	}
+	ds, err := datasource.NewDatasource(db, uri)
+	if err != nil {
+		return nil, err
+	}
+	go ds.Start()
+	return ds, nil
+}
 
+func SetDataloader(c *cache.Cache, db *proxima.ProximaDB, ds *datasource.Datasource) (*dataloader.Dataloader, error) {
+	loader , err:= dataloader.NewDataloader(c, db, ds)
+	if err != nil {
+		return nil, err
+	}
+	return loader, nil
+}
 
-	// handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-	// 			rc := graphql.GetResolverContext(ctx)
-	// 			fmt.Println("Entered", rc.Object, rc.Field.Name)
-	// 			res, err = next(ctx)
-	// 			fmt.Println("Left", rc.Object, rc.Field.Name, "=>", res, err)
-	// 			return res, err
-	// 		})
-
-//	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-//	log.Fatal(http.ListenAndServe(":"+port, nil))
+func getEnv(key string, defaultVal string) string {
+	if value, exists := os.LookupEnv(key); exists {
+	  return value
+  }
+    return defaultVal
 }

@@ -4,7 +4,8 @@ import (
   "net/http"
   "io/ioutil"
     json "github.com/json-iterator/go"
-  //"fmt"
+  "fmt"
+  "errors"
 )
 
 func  (d *Datasource) AccountFetch(args map[string]interface{}) (map[string]interface{}, error){
@@ -118,7 +119,7 @@ func  (d *Datasource) TimelockFetch(args map[string]interface{}) ([]byte, error)
 func (ds *Datasource) BlockStatsFetch() (map[string]interface{}, error) {
   args := make(map[string]interface{});
   blockStats, err := ds.DataRequest("blockStats", args)
-  if err != nil {
+  if err != nil || blockStats == nil {
     return nil, err
   }
   ds.proximaDB.Set(Primary, "BlockStats", blockStats.(map[string]interface{}), args)
@@ -127,19 +128,18 @@ func (ds *Datasource) BlockStatsFetch() (map[string]interface{}, error) {
 
 func (ds *Datasource) ValidatorsFetch() ([]map[string]interface{}, error) {
   args := make(map[string]interface{});
-  validators, err := ds.DataRequest("validators", args) //errs
-  if err != nil {
+  validators, err := ds.DataRequest("validators", args)
+  if err != nil || validators == nil {
     return nil, err
   }
   ds.proximaDB.Set(Primary, "Validators", validators.([]map[string]interface{}), args)
   return validators.([]map[string]interface{}), nil
-
 }
 
 func (ds *Datasource) TokensFetch() ([]map[string]interface{}, error) {
   args := make(map[string]interface{});
   tokens, err := ds.DataRequest("tokens", args) //errs
-  if err != nil {
+  if err != nil || tokens == nil {
     return nil, err
   }
   ds.proximaDB.Set(Primary, "Tokens", tokens, args)
@@ -149,7 +149,7 @@ func (ds *Datasource) TokensFetch() ([]map[string]interface{}, error) {
 func (ds *Datasource) MarketsFetch()  ([]map[string]interface{}, error){
   args := make(map[string]interface{});
   markets, err := ds.DataRequest("markets", args) //errs
-  if err != nil {
+  if err != nil || markets == nil {
     return nil, err
   }
   ds.proximaDB.Set(Primary, "Markets", markets, args)
@@ -159,7 +159,7 @@ func (ds *Datasource) MarketsFetch()  ([]map[string]interface{}, error){
 func (ds *Datasource) FeesFetch() ([]map[string]interface{}, error) {
   args := make(map[string]interface{});
   fees, err := ds.DataRequest("fees", args);
-  if err != nil {
+  if err != nil || fees == nil {
     return nil, err
   }
   ds.proximaDB.Set(Primary, "Fees", fees, args)
@@ -172,6 +172,13 @@ func (ds *Datasource) DataRequest(requestType string, args map[string]interface{
     return nil, err
   }
   val, tErr := BinanceTranslate(requestType, resp)
+  if val == nil {
+    fmt.Println(requestType)
+    fmt.Println(args)
+    fmt.Println(string(resp))
+    return nil, errors.New("Error with translation of vars")
+  }
+
   if tErr != nil {
     return nil, tErr
   }
@@ -183,10 +190,12 @@ func BinanceRequest(requestType string, baseUri string, args map[string]interfac
 
   resp, httpErr := http.Get(uri)
   if httpErr != nil {
+    //fmt.Println(uri)
     return nil, httpErr
   }
   body, ioErr := ioutil.ReadAll(resp.Body)
   if ioErr != nil {
+    //fmt.Println(uri)
     return nil, ioErr
   }
   return body, nil

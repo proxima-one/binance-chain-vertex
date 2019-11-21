@@ -2,8 +2,13 @@ version: "3"
 services:
   web:
     build: .
+    environment:
+      - DB_ADDRESS=db
+      - DB_PORT=50051
     ports:
       - "4000:4000"
+    depends_on:
+      - db
   db:
     image: chasesmith95/proxima-db-server:latest
     container_name: proxima-db

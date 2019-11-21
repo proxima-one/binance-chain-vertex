@@ -33,7 +33,7 @@ var TRANSLATE_RES = map[string]func([]byte) (interface{}, error) {
   "trades": tradesTranslate,
   "orders": ordersTranslate,
  }
-//todo
+
 func feesTranslate(res []byte) (interface{}, error) {
   fees:= make([]map[string]interface{}, 0)
   err:=json.Unmarshal(res, &fees)
@@ -71,12 +71,20 @@ func blockStatsTranslate(res []byte) (interface{}, error) {
 }
 
 func validatorsTranslate(res []byte) (interface{}, error) {
-  val := make([]map[string]interface{}, 0)
+  val := make(map[string]interface{})
   err := json.Unmarshal(res, &val)
   if err!= nil {
     return nil, err
   }
-  return val, nil
+  if val != nil && val["validators"] != nil {
+    v := make([]map[string]interface{}, len(val["validators"].([]interface{})))
+    for i, value := range val["validators"].([]interface{}) {
+      vals := value.(map[string]interface{})
+      v[i] = vals
+    }
+    return v, nil
+  }
+  return nil, nil
 }
 
 func tokensTranslate(res []byte) (interface{}, error) {
@@ -118,15 +126,13 @@ func marketTickerTranslate(res []byte) (interface{}, error) {
 func marketCandlesticksTranslate(res []byte) (interface{}, error) {
   val := make([]interface{}, 0)
   err := json.Unmarshal(res, &val)
-  //fmt.Println(val)
-  if err!= nil || val== nil || len(val) == 0 {
+  if err != nil || val == nil || len(val) == 0 {
     return nil, err
   }
   returnVal := make([]map[string]interface{}, len(val))
   for i, v := range val {
     vals := v.([]interface{})
     value := make(map[string]interface{})
-
     value["close"] =  vals[0].(float64)
     value["closingTime"] = fmt.Sprintf("%v", vals[1])
     value["high"], _ = strconv.ParseFloat(vals[2].(string), 64)
@@ -144,32 +150,27 @@ func marketCandlesticksTranslate(res []byte) (interface{}, error) {
 func marketDepthTranslate(res []byte) (interface{}, error) {
   val := make(map[string]interface{})
   err := json.Unmarshal(res, &val)
-
   if err!= nil || val == nil {
     return nil, err
   }
-
   if val["asks"] == nil {
     val["asks"] = make([]map[string]string,0)
   } else {
-
     val_Ask := val["asks"].([]interface{})
     length := len(val_Ask)
-    vAsk:=make([]map[string]string,length)
+    vAsk := make([]map[string]string,length)
     for i, v :=  range val_Ask {
       value := v.([]interface{})
       vAsk[i] = map[string]string{"price": fmt.Sprintf("%v", value[0]), "qty":fmt.Sprintf("%v", value[1])}
     }
     val["asks"] = vAsk
   }
-
   if val["bids"] == nil {
     val["bids"] = make([]map[string]string,0)
   } else {
-
     val_Bid := val["bids"].([]interface{})
     length := len(val_Bid)
-    vBid:= make([]map[string]string,length)
+    vBid := make([]map[string]string,length)
     for i, v :=  range val_Bid {
       value := v.([]interface{})
       vBid[i] = map[string]string{"price": fmt.Sprintf("%v", value[0]), "qty":fmt.Sprintf("%v", value[1])}
@@ -198,6 +199,7 @@ func transactionQueryTranslate(res []byte) (interface{}, error) {
     value["confirmBlocks"] = fmt.Sprintf("%v", value["confirmBlocks"])
     value["txAge"] = fmt.Sprintf("%v", value["txAge"])
     value["sequence"] = fmt.Sprintf("%v", value["sequence"])
+    value["data"] = fmt.Sprintf("%v", value["data"])
     returnVal[i] = value
   }
   return returnVal, nil
