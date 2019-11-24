@@ -1,16 +1,29 @@
 version: "3"
 services:
-  web:
-    build: .
-    environment:
-      - DB_ADDRESS=db
-      - DB_PORT=50051
+  binance_subgraph:
+    image: chasesmith95/binance-chain-subgraph:latest
     ports:
       - "4000:4000"
     depends_on:
       - db
+      - binance
+    environment:
+        - DB_ADDRESS=db
+        - DB_PORT=50051
+        - BINANCE_NODE_ADDRESS=binance 
+        - BINANCE_NODE_PORT=8080
   db:
     image: chasesmith95/proxima-db-server:latest
-    container_name: proxima-db
     ports:
       - "50051:50051"
+  binance:
+      image: chasesmith95/binance-chain-subgraph:latest
+      restart: unless-stopped
+      ulimits:
+        nproc: 65535
+      volumes:
+        - "/tmp/opt/binance-data:/opt/bnbchaind"
+      ports:
+        - "8080:8080"
+        - "27146:27146"
+        - "27147:27147"
