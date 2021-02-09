@@ -1,4 +1,4 @@
-# Binance Chain Subgraph
+# Binance Chain Vertex
 
 The Binance Chain Subgraph is intended to act as a server for the Binance chain.
 
